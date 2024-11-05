@@ -19,7 +19,7 @@ router.patch(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+
     const { status } = req.body;
 
     try {
@@ -34,20 +34,10 @@ router.patch(
 
       res.json({ message: "Order status updated successfully", order });
     } catch (error) {
-      res.status(500).json({ message: "Server error" });
+        next(error);
     }
   }
 );
-
-// Get all orders - Admin only
-router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const orders = await Order.find().populate("items.item_id", "name price");
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 // Create a new order
 router.post("/", async (req, res) => {
@@ -75,8 +65,18 @@ router.post("/", async (req, res) => {
     await newOrder.save();
     res.status(201).json(newOrder);
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 });
+
+// Get all orders - Admin only
+router.get("/", authMiddleware, async (req, res) => {
+    try {
+      const orders = await Order.find().populate("items.item_id", "name price");
+      res.json(orders);
+    } catch (error) {
+        next(error);
+    }
+  });
 
 module.exports = router;

@@ -15,7 +15,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     await menuItem.deleteOne();
     res.json({ message: "Menu item deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 });
 
@@ -66,7 +66,7 @@ router.put(
       await menuItem.save();
       res.json({ message: "Menu item updated successfully", menuItem });
     } catch (error) {
-      res.status(500).json({ message: "Server error" });
+        next(error);
     }
   }
 );
@@ -105,7 +105,7 @@ router.post(
         .status(201)
         .json({ message: "Menu item created successfully", newItem });
     } catch (error) {
-      res.status(500).json({ message: "Server error" });
+        next(error);
     }
   }
 );
@@ -113,10 +113,15 @@ router.post(
 // Get all menu items
 router.get("/", async (req, res) => {
   try {
-    const menuItems = await MenuItem.find();
-    res.json(menuItems);
+    const menuItem = await MenuItem.findById(req.params.id);
+    if (!menuItem) {
+      const error = new Error("Menu item not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    res.json(menuItem);
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error); // Pass the error to the centralized error handler
   }
 });
 
