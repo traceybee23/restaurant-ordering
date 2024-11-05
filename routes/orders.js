@@ -4,6 +4,27 @@ const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const authMiddleware = require('../middleware/authMiddleware');
 
+
+// Update order status - Admin only
+router.patch('/:id/status', authMiddleware, async (req, res) => {
+    const { status } = req.body;
+
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        // Update the order status
+        order.status = status;
+        await order.save();
+
+        res.json({ message: 'Order status updated successfully', order });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get all orders - Admin only
 router.get('/', authMiddleware, async (req, res) => {
     try {
@@ -13,6 +34,7 @@ router.get('/', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 // Create a new order
 router.post('/', async (req, res) => {
     const { items, total_price } = req.body;
