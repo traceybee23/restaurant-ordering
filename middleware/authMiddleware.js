@@ -1,20 +1,24 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
+        return res
+            .status(401)
+            .json({ message: "Access denied. No token provided." });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Admins only.' });
+        if (decoded.role !== "admin") {
+            return res
+                .status(403)
+                .json({ message: "Access denied. Admins only." });
         }
         req.user = decoded; // Store decoded token data (like user id) in req.user
         next();
     } catch (ex) {
-        res.status(400).json({ message: 'Invalid token.' });
+        res.status(400).json({ message: "Invalid token." });
     }
 };
 
